@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.0
+- موقع تنظیم و توی «داده‌های خام»، همه‌ی داده‌های مانیتور خونده می‌شه، نه فقط `canbus.*` (Setup and raw view now scan every head-unit key, not only `canbus.*`)
+- توی «داده‌های خام»، هر چیزی که تغییر کنه بالای لیست میاد (Changed values float to the top of the raw view)
+- بعد از تنظیم، فقط همون چند کلید لازم خونده می‌شه تا سبک بمونه (After setup only the learned keys are polled)
+
 ## 1.0.0
 - اولین نسخه: بنر هشدار باز موندن در، صندوق و کاپوت (First release: open door / trunk / hood alert banner)
 - تنظیم یک‌باره که خودش سیگنال هر در رو از CANBUS یاد می‌گیره (One-time wizard that learns each door's CANBUS signal)

@@ -47,7 +47,7 @@ If setup reports *no change detected*, open **Raw data**. If no line turns blue 
 
 ## How it works
 
-- **Data:** the CANBUS box feeds the head unit's `car` service, which stores values under keys such as `canbus.state.door_data`. Every 250 ms DoorAlert reads all `canbus.*` keys with one `request.dm.get_value_by_prefix` call, parsing the reply straight off the binder Parcel ([`CarData.java`](app/src/main/java/ir/maniimani/dooralert/CarData.java)).
+- **Data:** the CANBUS box feeds the head unit's `car` service, which stores values under keys such as `canbus.state.door_data`. During setup DoorAlert reads every key the head unit holds with one `request.dm.get_value_by_prefix` call; afterwards it polls only the learned keys every 250 ms, parsing the reply straight off the binder Parcel ([`CarData.java`](app/src/main/java/ir/maniimani/dooralert/CarData.java)).
 - **Learning:** every value is flattened into individual bits. The wizard samples the "all closed" state several times to rule out bits that flicker on their own. Then, for each door, it picks the bit that changes stably when only that door is open ([`Doors.java`](app/src/main/java/ir/maniimani/dooralert/Doors.java)).
 - **Alert card:** a small centred window that passes all touches outside itself through to the app below ([`PopupActivity.java`](app/src/main/java/ir/maniimani/dooralert/PopupActivity.java)).
 

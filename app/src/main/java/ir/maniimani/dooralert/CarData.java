@@ -51,7 +51,21 @@ final class CarData {
         return binder != null;
     }
 
+    /** Every value whose key starts with {@code prefix} ("" = everything the head unit knows). */
     List<Item> byPrefix(String prefix) {
+        Bundle b = new Bundle();
+        b.putString("arg_string", prefix);
+        return query("request.dm.get_value_by_prefix", b);
+    }
+
+    /** Only the given keys (each entry also works as a prefix). */
+    List<Item> byFilter(String[] keys) {
+        Bundle b = new Bundle();
+        b.putStringArray("key_filter", keys);
+        return query("request.dm.get_value_by_filter", b);
+    }
+
+    private List<Item> query(String what, Bundle b) {
         if (!connect()) {
             lastStatus = Status.NO_SERVICE;
             return Collections.emptyList();
@@ -59,12 +73,10 @@ final class CarData {
         Parcel d = Parcel.obtain(), r = Parcel.obtain();
         try {
             d.writeInterfaceToken(DESCRIPTOR);
-            d.writeString("request.dm.get_value_by_prefix");
+            d.writeString(what);
             d.writeInt(0);
             d.writeInt(0);
             d.writeString(null);
-            Bundle b = new Bundle();
-            b.putString("arg_string", prefix);
             d.writeInt(1);
             b.writeToParcel(d, 0);
             d.writeInt(0);

@@ -91,7 +91,7 @@ public class MainActivity extends Activity implements Doors.Listener {
     @Override
     public void onBackPressed() {
         if (raw.getVisibility() == View.VISIBLE) {
-            raw.setVisibility(View.GONE);
+            closeRaw();
             return;
         }
         if (wizard.getVisibility() == View.VISIBLE) {
@@ -111,7 +111,7 @@ public class MainActivity extends Activity implements Doors.Listener {
             status.setText("سرویس car مانیتور در دسترس نیست");
             status.setTextColor(Ui.RED);
         } else if (items == 0) {
-            status.setText("هنوز هیچ داده‌ای از CANBUS نرسیده");
+            status.setText("هنوز داده‌ای نرسیده");
             status.setTextColor(Ui.TEXT_3);
         } else if (!calibrated) {
             status.setText("تنظیم نشده — «تنظیم درها» رو بزن");
@@ -240,6 +240,7 @@ public class MainActivity extends Activity implements Doors.Listener {
     }
 
     private void openWizard() {
+        if (wizard.getVisibility() != View.VISIBLE) doors.beginFullScan();
         wizard.setVisibility(View.VISIBLE);
         wizard.setAlpha(0f);
         wizard.animate().alpha(1f).setDuration(250).start();
@@ -249,6 +250,7 @@ public class MainActivity extends Activity implements Doors.Listener {
 
     private void closeWizard() {
         sampling = false;
+        if (wizard.getVisibility() == View.VISIBLE) doors.endFullScan();
         wizard.animate().alpha(0f).setDuration(200).withEndAction(() -> wizard.setVisibility(View.GONE)).start();
     }
 
@@ -286,7 +288,7 @@ public class MainActivity extends Activity implements Doors.Listener {
     }
 
     private void captureBaseline() {
-        if (doors.items().isEmpty()) {
+        if (doors.items().isEmpty() && doors.status() == CarData.Status.NO_SERVICE) {
             wizText.setText(doors.status() == CarData.Status.NO_SERVICE
                     ? "سرویس car مانیتور در دسترس نیست، پس این مانیتور با DoorAlert سازگار نیست."
                     : "هنوز هیچ داده‌ای از CANBUS نمی‌رسه. سوییچ ماشین باز باشه و چند ثانیه بعد دوباره «شروع» رو بزن.");
@@ -363,12 +365,12 @@ public class MainActivity extends Activity implements Doors.Listener {
         head.setGravity(Gravity.CENTER_VERTICAL);
         head.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         TextView t = Ui.text(this, Ui.bold(), 18, Ui.TEXT);
-        t.setText("داده‌های خام CANBUS");
+        t.setText("داده‌های خام");
         head.addView(t, new LinearLayout.LayoutParams(0, -2, 1f));
-        head.addView(Ui.button(this, "بستن", false, v -> raw.setVisibility(View.GONE)));
+        head.addView(Ui.button(this, "بستن", false, v -> closeRaw()));
         col.addView(head);
         TextView note = Ui.text(this, Ui.regular(), 12, Ui.TEXT_3);
-        note.setText("موارد آبی همین الان تغییر کردن. یه در رو باز و بسته کن و ببین کدوم خط عوض می‌شه.");
+        note.setText("همه‌ی داده‌های مانیتور. هر چیزی که همین الان عوض بشه، آبی و بالای لیست میاد. یه در رو باز و بسته کن.");
         col.addView(note, lp(-1, -2, 4));
         ScrollView sv = new ScrollView(this);
         rawText = Ui.text(this, android.graphics.Typeface.MONOSPACE, 12, Ui.TEXT_2);
@@ -382,8 +384,14 @@ public class MainActivity extends Activity implements Doors.Listener {
     }
 
     private void openRaw() {
+        if (raw.getVisibility() != View.VISIBLE) doors.beginFullScan();
         raw.setVisibility(View.VISIBLE);
         renderRaw();
+    }
+
+    private void closeRaw() {
+        if (raw.getVisibility() == View.VISIBLE) doors.endFullScan();
+        raw.setVisibility(View.GONE);
     }
 
     private void renderRaw() {
@@ -392,18 +400,28 @@ public class MainActivity extends Activity implements Doors.Listener {
         for (CarData.Item it : doors.items()) sorted.put(it.key, CarData.describe(it.value));
         android.text.SpannableStringBuilder sb = new android.text.SpannableStringBuilder();
         if (sorted.isEmpty()) {
-            sb.append(doors.status() == CarData.Status.NO_SERVICE ? "car service not available" : "(no canbus.* data yet)");
+            sb.append(doors.status() == CarData.Status.NO_SERVICE ? "car service not available" : "(no data yet)");
         }
+        java.util.List<String> hot = new java.util.ArrayList<>(), cold = new java.util.ArrayList<>();
         for (Map.Entry<String, String> e : sorted.entrySet()) {
             String prev = rawPrev.get(e.getKey());
             if (prev != null && !prev.equals(e.getValue())) rawChanged.put(e.getKey(), now);
             rawPrev.put(e.getKey(), e.getValue());
             Long ch = rawChanged.get(e.getKey());
-            boolean hot = ch != null && now - ch < 4000;
-            int start = sb.length();
-            sb.append(e.getKey()).append(" = ").append(e.getValue()).append('\n');
-            if (hot) sb.setSpan(new android.text.style.ForegroundColorSpan(Ui.BLUE), start, sb.length(), 0);
+            String v = e.getValue();
+            if (v.length() > 140) v = v.substring(0, 140) + "…";
+            String line = e.getKey() + " = " + v + "\n";
+            if (ch != null && now - ch < 6000) hot.add(line);
+            else cold.add(line);
         }
+        sb.append(sorted.size() + " keys" + (hot.isEmpty() ? "" : " · " + hot.size() + " changed") + "\n\n");
+        for (String line : hot) {
+            int start = sb.length();
+            sb.append(line);
+            sb.setSpan(new android.text.style.ForegroundColorSpan(Ui.BLUE), start, sb.length(), 0);
+        }
+        if (!hot.isEmpty()) sb.append("\n");
+        for (String line : cold) sb.append(line);
         rawText.setText(sb);
     }
 

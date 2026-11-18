@@ -60,6 +60,9 @@ final class Doors {
     private volatile List<CarData.Item> lastItems = new ArrayList<>();
     private volatile Map<String, Integer> lastBits = new HashMap<>();
     private boolean[] demo;          // non-null while a demo is running
+    private volatile int fullScanUsers; // setup / raw view need every key, not just the learned ones
+
+    private static final String[] FALLBACK_PREFIXES = {"canbus.", "state.", "mcu.", "car.", "data.", "info.", "vehicle."};
 
     private Doors(Context c) {
         ctx = c;
@@ -87,7 +90,7 @@ final class Doors {
     private final Runnable poll = new Runnable() {
         @Override
         public void run() {
-            List<CarData.Item> items = car.byPrefix("canbus.");
+            List<CarData.Item> items = read();
             Map<String, Integer> bits = new HashMap<>();
             for (CarData.Item it : items) CarData.flatten(it.key, it.value, bits);
             lastItems = items;
@@ -95,9 +98,44 @@ final class Doors {
             boolean[] now = detect(bits);
             main.post(() -> publish(now));
             Handler w = worker;
-            if (w != null) w.postDelayed(this, 250);
+            if (w != null) w.postDelayed(this, fullScanUsers > 0 || !isCalibrated() ? 400 : 250);
         }
     };
+
+    /** Everything while setting up; afterwards only the handful of keys that matter. */
+    private List<CarData.Item> read() {
+        if (fullScanUsers == 0 && isCalibrated()) {
+            Set<String> keys = new HashSet<>();
+            for (Mapping m : map) if (m != null) keys.add(baseKey(m.bitKey));
+            return car.byFilter(keys.toArray(new String[0]));
+        }
+        List<CarData.Item> all = car.byPrefix("");
+        if (car.lastStatus == CarData.Status.ERROR || all.isEmpty()) {
+            // reply too large or empty: ask in smaller pieces
+            List<CarData.Item> merged = new ArrayList<>();
+            for (String p : FALLBACK_PREFIXES) merged.addAll(car.byPrefix(p));
+            return merged;
+        }
+        return all;
+    }
+
+    /** "canbus.state.door_data[2]#5" → "canbus.state.door_data" */
+    static String baseKey(String bitKey) {
+        int cut = bitKey.length();
+        for (char ch : new char[]{'#', '[', '/', '\''}) {
+            int i = bitKey.indexOf(ch);
+            if (i >= 0 && i < cut) cut = i;
+        }
+        return bitKey.substring(0, cut);
+    }
+
+    void beginFullScan() {
+        fullScanUsers++;
+    }
+
+    void endFullScan() {
+        if (fullScanUsers > 0) fullScanUsers--;
+    }
 
     private boolean[] detect(Map<String, Integer> bits) {
         boolean[] out = new boolean[COUNT];

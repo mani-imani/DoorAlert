@@ -49,7 +49,7 @@
 
 ## چطور کار می‌کنه
 
-- **داده‌ها:** جعبه‌ی CANBUS اطلاعات ماشین رو به سرویس سیستمی `car` مانیتور می‌فرسته، با کلیدهایی مثل `canbus.state.door_data`. DoorAlert هر ۲۵۰ میلی‌ثانیه همه‌ی کلیدهای `canbus.*` رو با یه درخواست (`request.dm.get_value_by_prefix`) می‌خونه و جواب رو مستقیم از Parcel باز می‌کنه ([`CarData.java`](app/src/main/java/ir/maniimani/dooralert/CarData.java)).
+- **داده‌ها:** جعبه‌ی CANBUS اطلاعات ماشین رو به سرویس سیستمی `car` مانیتور می‌فرسته، با کلیدهایی مثل `canbus.state.door_data`. موقع تنظیم، DoorAlert همه‌ی داده‌های مانیتور رو با یه درخواست (`request.dm.get_value_by_prefix`) می‌خونه و بعد از تنظیم فقط کلیدهایی که یاد گرفته رو هر ۲۵۰ میلی‌ثانیه چک می‌کنه و جواب رو مستقیم از Parcel باز می‌کنه ([`CarData.java`](app/src/main/java/ir/maniimani/dooralert/CarData.java)).
 - **یادگیری:** همه‌ی مقدارها بیت‌به‌بیت باز می‌شن. اپ اول حالت «همه بسته» رو چند بار نمونه‌برداری می‌کنه تا بیت‌هایی که خودشون تغییر می‌کنن (نویز) رو کنار بذاره. بعد برای هر در، بیتی رو انتخاب می‌کنه که فقط با باز شدن همون در، ثابت و قطعی عوض می‌شه ([`Doors.java`](app/src/main/java/ir/maniimani/dooralert/Doors.java)).
 - **کارت هشدار:** یه پنجره‌ی کوچیک وسط صفحه که لمس‌های بیرون از خودش رو به اپ زیرش می‌فرسته ([`PopupActivity.java`](app/src/main/java/ir/maniimani/dooralert/PopupActivity.java)).
 
