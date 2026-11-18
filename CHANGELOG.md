@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.0
+- والپیپر تیره‌ی DoorAlert: مانیتور موقع خاموش شدن ماشین همه‌ی اپ‌ها رو می‌بنده، به‌جز اپ والپیپر. با فعال کردنش، DoorAlert بعد از هر بار خاموش و روشن کردن ماشین خودش فعال می‌مونه (Live wallpaper keeps DoorAlert alive across ignition cycles: the head unit force-stops every user app on ACC off except the live-wallpaper app)
+
 ## 1.1.0
 - موقع تنظیم و توی «داده‌های خام»، همه‌ی داده‌های مانیتور خونده می‌شه، نه فقط `canbus.*` (Setup and raw view now scan every head-unit key, not only `canbus.*`)
 - توی «داده‌های خام»، هر چیزی که تغییر کنه بالای لیست میاد (Changed values float to the top of the raw view)

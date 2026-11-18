@@ -35,6 +35,7 @@ public class MainActivity extends Activity implements Doors.Listener {
     private TextView status;
     private final TextView[] rows = new TextView[Doors.COUNT];
     private TextView autoBtn;
+    private LinearLayout keepAlive;
 
     // wizard
     private FrameLayout wizard;
@@ -72,6 +73,25 @@ public class MainActivity extends Activity implements Doors.Listener {
         doors.startPolling();
         doors.addListener(this);
         updateAutoBtn();
+        keepAlive.setVisibility(KeepAliveWallpaper.isActive(this) ? View.GONE : View.VISIBLE);
+    }
+
+    private void enableWallpaper() {
+        Intent[] tries = {
+                new Intent(android.app.WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER)
+                        .putExtra(android.app.WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT, KeepAliveWallpaper.component(this)),
+                new Intent(android.app.WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER),
+                Intent.createChooser(new Intent(Intent.ACTION_SET_WALLPAPER), "والپیپر"),
+        };
+        for (Intent i : tries) {
+            try {
+                startActivity(i);
+                return;
+            } catch (Throwable ignored) {
+            }
+        }
+        status.setText("صفحه‌ی انتخاب والپیپر پیدا نشد؛ از تنظیمات مانیتور ← والپیپر، «DoorAlert» رو انتخاب کن");
+        status.setTextColor(Color.rgb(255, 200, 90));
     }
 
     @Override
@@ -165,6 +185,22 @@ public class MainActivity extends Activity implements Doors.Listener {
         col.addView(name);
         status = Ui.text(this, Ui.medium(), 14, Ui.TEXT_2);
         col.addView(status, lp(-1, -2, 2));
+
+        // keep-alive card: shown until the DoorAlert wallpaper is active
+        keepAlive = new LinearLayout(this);
+        keepAlive.setOrientation(LinearLayout.VERTICAL);
+        keepAlive.setPadding(dp(16), dp(14), dp(16), dp(14));
+        keepAlive.setBackground(Ui.round(Color.rgb(26, 20, 8), Color.rgb(120, 90, 30), dp(16), Math.max(1, dp(1))));
+        TextView kt = Ui.text(this, Ui.bold(), 15, Color.rgb(255, 200, 90));
+        kt.setText("یه قدم دیگه: والپیپر DoorAlert رو فعال کن");
+        keepAlive.addView(kt);
+        TextView kd = Ui.text(this, Ui.regular(), 13, Ui.TEXT_2);
+        kd.setLineSpacing(0, 1.25f);
+        kd.setText("مانیتور موقع خاموش شدن ماشین همه‌ی اپ‌ها رو می‌بنده، به‌جز اپ والپیپر. "
+                + "با این والپیپر تیره، DoorAlert بعد از هر بار خاموش و روشن کردن ماشین خودش فعال می‌مونه.");
+        keepAlive.addView(kd, lp(-1, -2, 4));
+        keepAlive.addView(Ui.button(this, "فعال‌سازی والپیپر", true, v -> enableWallpaper()), lp(-2, -2, 10));
+        col.addView(keepAlive, lp(-1, -2, 14));
 
         // 2 × 3 grid of states
         for (int r = 0; r < 3; r++) {

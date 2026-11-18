@@ -41,7 +41,8 @@ The head unit needs a CANBUS decoder box and the vendor `car` service (`android.
    - Close everything and tap **Start**.
    - When asked, open **only that one** door, tap **Record**, then close it.
    - **Skip** anything your car has no sensor for (e.g. the hood).
-3. Done. **Demo** shows the alert at any time.
+3. **Turn on the DoorAlert wallpaper** (button on the app's main screen). When the car is switched off, the head unit force-stops every installed app *except* the live-wallpaper app. With this dark wallpaper set, DoorAlert keeps working after every ignition cycle.
+4. Done. **Demo** shows the alert at any time.
 
 If setup reports *no change detected*, open **Raw data**. If no line turns blue while you open and close a door, the CANBUS box isn't sending door state.
 

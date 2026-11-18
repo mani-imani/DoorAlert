@@ -36,12 +36,28 @@
             android:name=".DoorService"
             android:exported="false" />
 
+        <!-- live wallpaper: the head unit never force-stops the wallpaper app on ACC off -->
+        <service
+            android:name=".KeepAliveWallpaper"
+            android:label="@string/wallpaper_name"
+            android:exported="true"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/wallpaper" />
+        </service>
+
         <receiver
             android:name=".BootReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.car.action.EXIT_SLEEP" />
+                <action android:name="android.car.action.ACC_STATE" />
             </intent-filter>
         </receiver>
     </application>
