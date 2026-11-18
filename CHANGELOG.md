@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.3
+- رفع باگ: متن کارت بریده می‌شد و اسم در باز یا «بسته‌ست» دیده نمی‌شد. حالا کارت عرض ثابت و کافی داره و متن همیشه کامل نمایش داده می‌شه (Fix: the card text was cut off, hiding the door names and "closed"; the card now has a fixed, wide enough width)
+
 ## 1.2.2
 - شروع دوباره با سیگنال‌های بیدار شدن و راه‌اندازی مانیتور (`EXIT_SLEEP`، `CAR_BOOT_COMPLETED`) که به اپ‌های بسته‌شده هم می‌رسه؛ README کامل‌تر (Also restarts on the vendor wake/boot broadcasts that reach force-stopped apps; fuller README)
 

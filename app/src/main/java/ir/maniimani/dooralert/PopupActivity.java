@@ -43,7 +43,11 @@ public class PopupActivity extends Activity implements Doors.Listener {
         // a small window at the top: the rest of the screen stays usable
         Window w = getWindow();
         w.setGravity(Gravity.CENTER);
-        w.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT);
+        // An explicit width: a WRAP_CONTENT window is first measured at the small "dialog"
+        // width, which made the big title wrap and get cut ("همه‌چیز" without "بسته‌ست").
+        android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
+        int winW = Math.min((int) (dm.widthPixels * 0.82f), Ui.dp(this, 760));
+        w.setLayout(winW, WindowManager.LayoutParams.WRAP_CONTENT);
         w.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                 | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
@@ -53,7 +57,7 @@ public class PopupActivity extends Activity implements Doors.Listener {
         card.setGravity(Gravity.CENTER_VERTICAL);
         card.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         card.setPadding(gp + Ui.dp(this, 22), gp + Ui.dp(this, 20), gp + Ui.dp(this, 34), gp + Ui.dp(this, 20));
-        card.setMinimumWidth(Ui.dp(this, 460) + 2 * gp);
+        card.setMinimumWidth(winW);
         card.setOnClickListener(v -> dismissByUser());
 
         badge = new AlertCard.Badge(this);
@@ -64,11 +68,13 @@ public class PopupActivity extends Activity implements Doors.Listener {
         title = Ui.text(this, Ui.black(), 34, Color.WHITE);
         title.setShadowLayer(Ui.dp(this, 6), 0, Ui.dp(this, 1), Color.argb(90, 0, 0, 0));
         sub = Ui.text(this, Ui.bold(), 18, Color.argb(235, 255, 255, 255));
-        texts.addView(title);
-        LinearLayout.LayoutParams sl = new LinearLayout.LayoutParams(-2, -2);
+        title.setMaxLines(2);
+        sub.setMaxLines(3);
+        texts.addView(title, new LinearLayout.LayoutParams(-1, -2));
+        LinearLayout.LayoutParams sl = new LinearLayout.LayoutParams(-1, -2);
         sl.topMargin = Ui.dp(this, 2);
         texts.addView(sub, sl);
-        LinearLayout.LayoutParams tl = new LinearLayout.LayoutParams(-2, -2);
+        LinearLayout.LayoutParams tl = new LinearLayout.LayoutParams(0, -2, 1f);
         tl.setMarginStart(Ui.dp(this, 18));
         card.addView(texts, tl);
         setContentView(card);
@@ -144,14 +150,12 @@ public class PopupActivity extends Activity implements Doors.Listener {
 
     private void setText(TextView tv, String s) {
         if (s.contentEquals(tv.getText())) return;
-        if (tv.getText().length() == 0) {
-            tv.setText(s);
-            return;
-        }
-        tv.animate().alpha(0f).setDuration(120).withEndAction(() -> {
-            tv.setText(s);
-            tv.animate().alpha(1f).setDuration(220).start();
-        }).start();
+        boolean first = tv.getText().length() == 0;
+        tv.setText(s);
+        if (first) return;
+        tv.animate().cancel();
+        tv.setAlpha(0.25f);
+        tv.animate().alpha(1f).setDuration(260).start();
     }
 
     private boolean okShown;
