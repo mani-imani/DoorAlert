@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.2
+- شروع دوباره با سیگنال‌های بیدار شدن و راه‌اندازی مانیتور (`EXIT_SLEEP`، `CAR_BOOT_COMPLETED`) که به اپ‌های بسته‌شده هم می‌رسه؛ README کامل‌تر (Also restarts on the vendor wake/boot broadcasts that reach force-stopped apps; fuller README)
+
 ## 1.2.1
 - رفع باگ: کارت سبز «همه‌چیز بسته‌ست» حالا واقعاً بعد از ۲ ثانیه خودش می‌ره (Fix: the green card now really closes itself after ~2s; the timer was being restarted on every poll)
 

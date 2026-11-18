@@ -57,6 +57,8 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
                 <action android:name="android.car.action.EXIT_SLEEP" />
+                <action android:name="android.car.action.CAR_BOOT_COMPLETED" />
+                <action android:name="android.car.action.CAR_APP_INIT_COMPLETED" />
                 <action android:name="android.car.action.ACC_STATE" />
             </intent-filter>
         </receiver>
