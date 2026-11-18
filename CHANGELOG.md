@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.1
+- رفع باگ: کارت سبز «همه‌چیز بسته‌ست» حالا واقعاً بعد از ۲ ثانیه خودش می‌ره (Fix: the green card now really closes itself after ~2s; the timer was being restarted on every poll)
+
 ## 1.2.0
 - والپیپر تیره‌ی DoorAlert: مانیتور موقع خاموش شدن ماشین همه‌ی اپ‌ها رو می‌بنده، به‌جز اپ والپیپر. با فعال کردنش، DoorAlert بعد از هر بار خاموش و روشن کردن ماشین خودش فعال می‌مونه (Live wallpaper keeps DoorAlert alive across ignition cycles: the head unit force-stops every user app on ACC off except the live-wallpaper app)
 

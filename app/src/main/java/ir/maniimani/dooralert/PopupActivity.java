@@ -106,6 +106,7 @@ public class PopupActivity extends Activity implements Doors.Listener {
         for (int i = 0; i < Doors.COUNT; i++) if (open[i]) names.add(Doors.NAMES[i]);
         if (names.count > 0) {
             sawOpen = true;
+            okShown = false;
             main.removeCallbacks(closeAfterOk);
             card.setOk(false);
             if (names.count == 1) {
@@ -116,6 +117,9 @@ public class PopupActivity extends Activity implements Doors.Listener {
                 setText(sub, names.joined + " · لطفاً ببندید");
             }
         } else if (sawOpen) {
+            // the doors are re-read every 250ms: schedule the close only once, on the switch to green
+            if (okShown) return;
+            okShown = true;
             card.setOk(true);
             setText(title, "همه‌چیز بسته‌ست");
             setText(sub, "با خیال راحت حرکت کنید");
@@ -150,6 +154,7 @@ public class PopupActivity extends Activity implements Doors.Listener {
         }).start();
     }
 
+    private boolean okShown;
     private final Runnable closeAfterOk = this::animateOut;
 
     private void dismissByUser() {
@@ -166,6 +171,10 @@ public class PopupActivity extends Activity implements Doors.Listener {
                     finish();
                     overridePendingTransition(0, 0);
                 }).start();
+        // safety net: close even if the animation never reports its end
+        main.postDelayed(() -> {
+            if (!isFinishing()) finish();
+        }, 700);
     }
 
     private void runDemo() {
